@@ -44,6 +44,21 @@ class IdleGame:
                           exitfont, "PLANT", plantBtnTxtColor)
     plantBtn.SetHoverData(plantBtnWidth + 32, plantBtnHeight + 32, plantBtnHoverColor, plantBtnHoverTxtColor)
 
+    cancelBtnColor = (2, 2, 2)
+    cancelBtnTxtColor = (255, 0, 0)
+    cancelBtnHoverColor = (52, 52, 52)
+    cancelBtnHoverTxtColor = (255, 0, 0)
+
+    cancelBtnWidth = 65
+    cancelBtnHeight = 65
+    cancelBtnX = 100
+    cancelBtnY = 100
+
+    cancelBtn = Button(screen, cancelBtnX, cancelBtnY,
+                      cancelBtnWidth, cancelBtnHeight, cancelBtnColor,
+                      exitfont, "DON'T", cancelBtnTxtColor)
+    cancelBtn.SetHoverData(cancelBtnWidth + 23, cancelBtnHeight + 23, cancelBtnHoverColor, cancelBtnHoverTxtColor)
+
     def Initialize(self):
         self.states["menu"] = self.RunMenu
         self.states["game"] = self.RunGame
@@ -144,6 +159,9 @@ class IdleGame:
         if self.plantMenuState == 0:
             self.plantBtn.draw()
             self.UpdateBtnHover(self.plantBtn)
+        if self.plantMenuState == 1:
+            self.cancelBtn.draw()
+            self.UpdateBtnHover(self.cancelBtn)
 
 #ye
         #self.screen.blit(self.crops, (0, 0))
@@ -160,8 +178,6 @@ class IdleGame:
         gridY = (mousePos[1] // self.gridSize) * self.gridSize
         if self.showHoverSquare:
             pygame.draw.rect(self.screen, (150, 150, 0), (gridX, gridY, self.gridSize, self.gridSize))
-
-
 
         pygame.display.flip()
 
