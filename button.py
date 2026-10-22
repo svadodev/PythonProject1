@@ -1,6 +1,7 @@
 import pygame
 
 class Button:
+    active = True
     rect = pygame.Rect(0,0,0,0)
     color = (0, 0, 0)
     defaultColor = (0,0,0)
@@ -40,6 +41,7 @@ class Button:
 
         self.txt = txt
         self.txtColor = txtColor
+        self.defaultTxtColor = txtColor
         self.txtObject = self.font.render(self.txt, True, self.txtColor)
 
         self.txtCenterX = x+(width / 2) - (self.txtObject.get_width() / 2)

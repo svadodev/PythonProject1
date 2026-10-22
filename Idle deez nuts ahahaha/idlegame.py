@@ -29,35 +29,18 @@ class IdleGame:
     gameState = "game"
     states = {}
 
-    plantBtnColor = (200, 200, 200)
-    plantBtnTxtColor = (0, 0, 0)
-    plantBtnHoverColor = (255, 255, 255)
-    plantBtnHoverTxtColor = (0, 0, 0)
+    buttons = {
+        "plantBtn": Button(screen=screen, x=100, y=100,
+                          width=56, height=56, color=(255,255,255),
+                          font=exitfont, txt="PLANT", txtColor=(0,0,0)),
+        "plantCancelBtn" : Button(screen, x=100, y=100,
+                      width=65, height=65, color=(6,6,6),
+                      font=exitfont, txt="DON'T", txtColor=(255,255,255))
 
-    plantBtnWidth = 56
-    plantBtnHeight = 56
-    plantBtnX = 100
-    plantBtnY = 100
-
-    plantBtn = Button(screen, plantBtnX, plantBtnY,
-                          plantBtnWidth, plantBtnHeight, plantBtnColor,
-                          exitfont, "PLANT", plantBtnTxtColor)
-    plantBtn.SetHoverData(plantBtnWidth + 32, plantBtnHeight + 32, plantBtnHoverColor, plantBtnHoverTxtColor)
-
-    cancelBtnColor = (2, 2, 2)
-    cancelBtnTxtColor = (255, 0, 0)
-    cancelBtnHoverColor = (52, 52, 52)
-    cancelBtnHoverTxtColor = (255, 0, 0)
-
-    cancelBtnWidth = 65
-    cancelBtnHeight = 65
-    cancelBtnX = 100
-    cancelBtnY = 100
-
-    cancelBtn = Button(screen, cancelBtnX, cancelBtnY,
-                      cancelBtnWidth, cancelBtnHeight, cancelBtnColor,
-                      exitfont, "DON'T", cancelBtnTxtColor)
-    cancelBtn.SetHoverData(cancelBtnWidth + 23, cancelBtnHeight + 23, cancelBtnHoverColor, cancelBtnHoverTxtColor)
+    }
+    buttons["plantBtn"].SetHoverData(56 + 32, 56 + 32, (255,255,255), (0,0,0))
+    buttons["plantCancelBtn"].SetHoverData(65 + 23, 65 + 23, (6,6,6), (255,255,255))
+    buttons["plantCancelBtn"].active = False
 
     def Initialize(self):
         self.states["menu"] = self.RunMenu
@@ -71,7 +54,8 @@ class IdleGame:
         # self.resumeStartBtn.callback = self.StartGame
         # self.creditStartBtn.callback = self.StartCredits
         # self.backCredBtn.callback = self.PauseGame
-        self.plantBtn.callback = self.OnClickPlantBtn
+        self.buttons["plantBtn"].callback = self.OnClickPlantBtn
+        self.buttons["plantCancelBtn"].callback = self.OnClickPlantCancelBtn
 
     def StartGame(self):
         self.gameState = "game"
@@ -98,6 +82,9 @@ class IdleGame:
         mouse = pygame.mouse.get_pos()
         if btn.rect.collidepoint(mouse):
             btn.callback()
+            return True
+        else:
+            return False
 
     def RunPause(self):
         self.screen.fill((30, 30, 255))
@@ -156,13 +143,11 @@ class IdleGame:
 
     def RunGame(self):
         self.screen.fill((111,164,48))
-        if self.plantMenuState == 0:
-            self.plantBtn.draw()
-            self.UpdateBtnHover(self.plantBtn)
-        if self.plantMenuState == 1:
-            self.cancelBtn.draw()
-            self.UpdateBtnHover(self.cancelBtn)
 
+        for k in self.buttons:
+            if self.buttons[k].active:
+                self.buttons[k].draw()
+                self.UpdateBtnHover(self.buttons[k])
 #ye
         #self.screen.blit(self.crops, (0, 0))
 
@@ -170,8 +155,11 @@ class IdleGame:
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.plantMenuState == 0:
-                    self.UpdateBtnCallback(self.plantBtn)
+                for k in self.buttons:
+                    if self.buttons[k].active:
+                        clicked = self.UpdateBtnCallback(self.buttons[k])
+                        if clicked:
+                            break
 
         mousePos = pygame.mouse.get_pos()
         gridX = (mousePos[0] // self.gridSize) * self.gridSize
@@ -182,5 +170,8 @@ class IdleGame:
         pygame.display.flip()
 
     def OnClickPlantBtn(self):
-        self.plantMenuState = 1
-
+        self.buttons["plantBtn"].active = False
+        self.buttons["plantCancelBtn"].active = True
+    def OnClickPlantCancelBtn(self):
+        self.buttons["plantCancelBtn"].active = False
+        self.buttons["plantBtn"].active = True
