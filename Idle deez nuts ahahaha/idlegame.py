@@ -15,15 +15,34 @@ class IdleGame:
     titlefont = pygame.font.SysFont(None, 64)
     exitfont = pygame.font.SysFont(None, 24)
 
+    showHoverSquare = True
+
+    plantMenuState = 0
+
 
     gridSize = 32
 
     background = pygame.image.load("idle deez nuts ahahaha/Minifantasy_FarmTileset.png")
-    crops = pygame.image.load("idle deez nuts ahahaha/Minifantasy_FarmSeedsAndCrops.png")
-    crops = pygame.transform.scale(crops, (gridSize, gridSize))
+
+    #crops = pygame.transform.scale(crops, (gridSize, gridSize))
 
     gameState = "game"
     states = {}
+
+    plantBtnColor = (200, 200, 200)
+    plantBtnTxtColor = (0, 0, 0)
+    plantBtnHoverColor = (255, 255, 255)
+    plantBtnHoverTxtColor = (0, 0, 0)
+
+    plantBtnWidth = 56
+    plantBtnHeight = 56
+    plantBtnX = 100
+    plantBtnY = 100
+
+    plantBtn = Button(screen, plantBtnX, plantBtnY,
+                          plantBtnWidth, plantBtnHeight, plantBtnColor,
+                          exitfont, "PLANT", plantBtnTxtColor)
+    plantBtn.SetHoverData(plantBtnWidth + 32, plantBtnHeight + 32, plantBtnHoverColor, plantBtnHoverTxtColor)
 
     def Initialize(self):
         self.states["menu"] = self.RunMenu
@@ -37,6 +56,7 @@ class IdleGame:
         # self.resumeStartBtn.callback = self.StartGame
         # self.creditStartBtn.callback = self.StartCredits
         # self.backCredBtn.callback = self.PauseGame
+        self.plantBtn.callback = self.OnClickPlantBtn
 
     def StartGame(self):
         self.gameState = "game"
@@ -54,8 +74,10 @@ class IdleGame:
         mouse = pygame.mouse.get_pos()
         if btn.rect.collidepoint(mouse):
             btn.OnHoverEnter()
+            self.showHoverSquare = False
         else:
             btn.OnHoverExit()
+            self.showHoverSquare = True
 
     def UpdateBtnCallback(self, btn):
         mouse = pygame.mouse.get_pos()
@@ -119,17 +141,30 @@ class IdleGame:
 
     def RunGame(self):
         self.screen.fill((111,164,48))
+        if self.plantMenuState == 0:
+            self.plantBtn.draw()
+            self.UpdateBtnHover(self.plantBtn)
 
-        self.screen.blit(self.crops, (0, 0))
+#ye
+        #self.screen.blit(self.crops, (0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.plantMenuState == 0:
+                    self.UpdateBtnCallback(self.plantBtn)
 
         mousePos = pygame.mouse.get_pos()
         gridX = (mousePos[0] // self.gridSize) * self.gridSize
         gridY = (mousePos[1] // self.gridSize) * self.gridSize
-        pygame.draw.rect(self.screen, (150, 150, 0), (gridX, gridY, self.gridSize, self.gridSize))
+        if self.showHoverSquare:
+            pygame.draw.rect(self.screen, (150, 150, 0), (gridX, gridY, self.gridSize, self.gridSize))
+
+
 
         pygame.display.flip()
+
+    def OnClickPlantBtn(self):
+        self.plantMenuState = 1
 
