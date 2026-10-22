@@ -1,8 +1,8 @@
-In the beginning. there was nothing.
+In the beginning, there was nothing.
 There was only a light.
 That light was God.
 God wanted more.
-God create more.
+God created more.
 God said, "Let there be light"
 And I showed up and shone a flashlight directly on his face.
 He was fairly pissed.
