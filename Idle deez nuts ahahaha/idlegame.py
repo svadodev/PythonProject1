@@ -133,4 +133,3 @@ class IdleGame:
 
         pygame.display.flip()
 
-        
