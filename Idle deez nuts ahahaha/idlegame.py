@@ -1,7 +1,7 @@
 import pygame
 import random
 import sys
-from button import Button
+from idlebutton import Button
 from player import Player
 
 
@@ -42,7 +42,7 @@ class IdleGame:
                       font=exitfont, txt="DON'T", txtColor=(255,255,255)),
         "sunflowerBtn" : Button(screen, x=195, y=100,
                       width=65, height=65, color=(125,125,125),
-                      font=plantfont, txt="Sunflower: $5", txtColor=(255,255,255))
+                      font=plantfont, txt="Sunflower: $5", txtColor=(255,255,255), alignment=1, btnImage=sunflower)
 
     }
     buttons["plantBtn"].SetHoverData(56 + 32, 56 + 32, (255,255,255), (0,0,0))
