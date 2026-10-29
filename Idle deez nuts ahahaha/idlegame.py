@@ -14,6 +14,7 @@ class IdleGame:
     font = pygame.font.SysFont(None, 48)
     titlefont = pygame.font.SysFont(None, 64)
     exitfont = pygame.font.SysFont(None, 24)
+    plantfont = pygame.font.SysFont(None, 12)
 
     showHoverSquare = True
 
@@ -22,7 +23,10 @@ class IdleGame:
 
     gridSize = 32
 
+    moneyTxt = font.render("$0", True, (200, 155, 23))
+
     background = pygame.image.load("idle deez nuts ahahaha/Minifantasy_FarmTileset.png")
+    sunflower = pygame.image.load("idle deez nuts ahahaha/sunflower.png")
 
     #crops = pygame.transform.scale(crops, (gridSize, gridSize))
 
@@ -35,12 +39,18 @@ class IdleGame:
                           font=exitfont, txt="PLANT", txtColor=(0,0,0)),
         "plantCancelBtn" : Button(screen, x=100, y=100,
                       width=65, height=65, color=(6,6,6),
-                      font=exitfont, txt="DON'T", txtColor=(255,255,255))
+                      font=exitfont, txt="DON'T", txtColor=(255,255,255)),
+        "sunflowerBtn" : Button(screen, x=195, y=100,
+                      width=65, height=65, color=(125,125,125),
+                      font=plantfont, txt="Sunflower: $5", txtColor=(255,255,255))
 
     }
     buttons["plantBtn"].SetHoverData(56 + 32, 56 + 32, (255,255,255), (0,0,0))
     buttons["plantCancelBtn"].SetHoverData(65 + 23, 65 + 23, (6,6,6), (255,255,255))
     buttons["plantCancelBtn"].active = False
+    buttons["sunflowerBtn"].SetHoverData(65 + 23, 65 + 23, (125,125,125), (255,255,255))
+    buttons["sunflowerBtn"].active = False
+
 
     def Initialize(self):
         self.states["menu"] = self.RunMenu
@@ -143,6 +153,7 @@ class IdleGame:
 
     def RunGame(self):
         self.screen.fill((111,164,48))
+        self.screen.blit(self.moneyTxt, (self.screen.get_width()-self.moneyTxt.get_width() - 10,10))
 
         for k in self.buttons:
             if self.buttons[k].active:
@@ -172,6 +183,8 @@ class IdleGame:
     def OnClickPlantBtn(self):
         self.buttons["plantBtn"].active = False
         self.buttons["plantCancelBtn"].active = True
+        self.buttons["sunflowerBtn"].active = True
     def OnClickPlantCancelBtn(self):
         self.buttons["plantCancelBtn"].active = False
         self.buttons["plantBtn"].active = True
+        self.buttons["sunflowerBtn"].active = False
