@@ -1,12 +1,15 @@
+from threading import get_ident
+
 import pygame
 import random
 import sys
 from idlebutton import Button
 from player import Player
+from plant import Plant
 
 
 class IdleGame:
-    screen = pygame.display.set_mode((640, 480))
+    screen = pygame.display.set_mode((1280, 960))
     pygame.display.set_caption("Game Running Idle")
     clock = pygame.time.Clock()
 
@@ -17,32 +20,43 @@ class IdleGame:
     plantfont = pygame.font.SysFont(None, 12)
 
     showHoverSquare = True
+    mousePos = (0,0)
+    gridX = 0
+    gridY = 0
 
     plantMenuState = 0
 
 
-    gridSize = 32
+    gridSize = 64
 
     moneyTxt = font.render("$0", True, (200, 155, 23))
+    money = 0
+
+
 
     background = pygame.image.load("idle deez nuts ahahaha/Minifantasy_FarmTileset.png")
     sunflower = pygame.image.load("idle deez nuts ahahaha/sunflower.png")
+    radish = pygame.image.load("idle deez nuts ahahaha/radish.png")
 
-    #crops = pygame.transform.scale(crops, (gridSize, gridSize))
+
 
     gameState = "game"
     states = {}
 
     buttons = {
-        "plantBtn": Button(screen=screen, x=100, y=100,
+        "plantBtn": Button(screen=screen, x=100, y=64,
                           width=56, height=56, color=(255,255,255),
                           font=exitfont, txt="PLANT", txtColor=(0,0,0)),
-        "plantCancelBtn" : Button(screen, x=100, y=100,
+        "plantCancelBtn" : Button(screen, x=100, y=64,
                       width=65, height=65, color=(6,6,6),
                       font=exitfont, txt="DON'T", txtColor=(255,255,255)),
-        "sunflowerBtn" : Button(screen, x=195, y=100,
+        "sunflowerBtn" : Button(screen, x=195, y=64,
                       width=65, height=65, color=(125,125,125),
-                      font=plantfont, txt="Sunflower: $5", txtColor=(255,255,255), alignment=1, btnImage=sunflower)
+                      font=plantfont, txt="Sunflower: $5", txtColor=(255,255,255), alignment=1, btnImage=sunflower),
+        "radishBtn": Button(screen, x=290, y=64,
+                               width=65, height=65, color=(125, 125, 125),
+                               font=plantfont, txt="Radish: $10", txtColor=(255, 255, 255), alignment=1,
+                               btnImage=radish)
 
     }
     buttons["plantBtn"].SetHoverData(56 + 32, 56 + 32, (255,255,255), (0,0,0))
@@ -50,7 +64,11 @@ class IdleGame:
     buttons["plantCancelBtn"].active = False
     buttons["sunflowerBtn"].SetHoverData(65 + 23, 65 + 23, (125,125,125), (255,255,255))
     buttons["sunflowerBtn"].active = False
+    buttons["radishBtn"].SetHoverData(65 + 23, 65 + 23, (125, 125, 125), (255, 255, 255))
+    buttons["radishBtn"].active = False
 
+    currentSelectPlant = None
+    plantGrid = {}
 
     def Initialize(self):
         self.states["menu"] = self.RunMenu
@@ -66,6 +84,9 @@ class IdleGame:
         # self.backCredBtn.callback = self.PauseGame
         self.buttons["plantBtn"].callback = self.OnClickPlantBtn
         self.buttons["plantCancelBtn"].callback = self.OnClickPlantCancelBtn
+        self.buttons["sunflowerBtn"].callback = self.OnClickSunflowerBtn
+        self.buttons["radishBtn"].callback = self.OnClickRadishBtn
+
 
     def StartGame(self):
         self.gameState = "game"
@@ -84,9 +105,11 @@ class IdleGame:
         if btn.rect.collidepoint(mouse):
             btn.OnHoverEnter()
             self.showHoverSquare = False
+
         else:
             btn.OnHoverExit()
             self.showHoverSquare = True
+
 
     def UpdateBtnCallback(self, btn):
         mouse = pygame.mouse.get_pos()
@@ -153,13 +176,14 @@ class IdleGame:
 
     def RunGame(self):
         self.screen.fill((111,164,48))
+        self.moneyTxt = self.font.render(f"${self.money}", True, (200, 155, 23))
         self.screen.blit(self.moneyTxt, (self.screen.get_width()-self.moneyTxt.get_width() - 10,10))
 
         for k in self.buttons:
             if self.buttons[k].active:
                 self.buttons[k].draw()
                 self.UpdateBtnHover(self.buttons[k])
-#ye
+
         #self.screen.blit(self.crops, (0, 0))
 
         for event in pygame.event.get():
@@ -171,20 +195,50 @@ class IdleGame:
                         clicked = self.UpdateBtnCallback(self.buttons[k])
                         if clicked:
                             break
+                if self.currentSelectPlant is not None and self.currentSelectPlant.planted == 0 and self.showHoverSquare:
+                    self.currentSelectPlant.planted = 1
+                    self.currentSelectPlant.x = self.gridX
+                    self.currentSelectPlant.y = self.gridY
+                    self.plantGrid[(self.gridX, self.gridY)] = self.currentSelectPlant
+                    self.money -= self.currentSelectPlant.cost
+                    self.currentSelectPlant = None
+                if self.currentSelectPlant is None and (self.gridX, self.gridY) in self.plantGrid:
+                    if self.plantGrid[(self.gridX, self.gridY)].maxGrowth:
+                        self.money += self.plantGrid[(self.gridX, self.gridY)].harvestMoney
+                        del self.plantGrid[(self.gridX, self.gridY)]
 
-        mousePos = pygame.mouse.get_pos()
-        gridX = (mousePos[0] // self.gridSize) * self.gridSize
-        gridY = (mousePos[1] // self.gridSize) * self.gridSize
+
+
+        self.mousePos = pygame.mouse.get_pos()
+        self.gridX = (self.mousePos[0] // self.gridSize) * self.gridSize
+        self.gridY = (self.mousePos[1] // self.gridSize) * self.gridSize
         if self.showHoverSquare:
-            pygame.draw.rect(self.screen, (150, 150, 0), (gridX, gridY, self.gridSize, self.gridSize))
-
+            pygame.draw.rect(self.screen, (150, 150, 0), (self.gridX, self.gridY, self.gridSize, self.gridSize))
+        if self.currentSelectPlant is not None and self.currentSelectPlant.planted == 0:
+            self.screen.blit(self.currentSelectPlant.image, (self.gridX+20, self.gridY +10))
+        for pos in self.plantGrid:
+            self.screen.blit(self.plantGrid[pos].image, (self.plantGrid[pos].x+20, self.plantGrid[pos].y+10))
+            self.plantGrid[pos].drawData()
+            self.plantGrid[pos].UpdateGrowth()
         pygame.display.flip()
 
     def OnClickPlantBtn(self):
         self.buttons["plantBtn"].active = False
         self.buttons["plantCancelBtn"].active = True
         self.buttons["sunflowerBtn"].active = True
+        self.buttons["radishBtn"].active = True
     def OnClickPlantCancelBtn(self):
         self.buttons["plantCancelBtn"].active = False
         self.buttons["plantBtn"].active = True
         self.buttons["sunflowerBtn"].active = False
+        self.buttons["radishBtn"].active = False
+    def OnClickSunflowerBtn(self):
+        self.currentSelectPlant = Plant(self.screen, self.mousePos[0], self.mousePos[1], 7, 11, self.sunflower)
+        self.currentSelectPlant.growthSpeed = 50
+        self.currentSelectPlant.harvestMoney = 10
+        self.currentSelectPlant.cost = 5
+    def OnClickRadishBtn(self):
+        self.currentSelectPlant = Plant(self.screen, self.mousePos[0], self.mousePos[1], 7, 11, self.radish)
+        self.currentSelectPlant.growthSpeed = 75
+        self.currentSelectPlant.harvestMoney = 20
+        self.currentSelectPlant.cost = 10
