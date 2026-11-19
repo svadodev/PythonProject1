@@ -1,10 +1,5 @@
-from threading import get_ident
-
 import pygame
-import random
-import sys
 from idlebutton import Button
-from player import Player
 from plant import Plant
 
 
@@ -37,6 +32,8 @@ class IdleGame:
     background = pygame.image.load("idle deez nuts ahahaha/Minifantasy_FarmTileset.png")
     sunflower = pygame.image.load("idle deez nuts ahahaha/sunflower.png")
     radish = pygame.image.load("idle deez nuts ahahaha/radish.png")
+    radishes = [pygame.image.load(f"idle deez nuts ahahaha/radish_{i}.png") for i in range(5)]
+
 
 
 
@@ -86,6 +83,7 @@ class IdleGame:
         self.buttons["plantCancelBtn"].callback = self.OnClickPlantCancelBtn
         self.buttons["sunflowerBtn"].callback = self.OnClickSunflowerBtn
         self.buttons["radishBtn"].callback = self.OnClickRadishBtn
+        self.radishes = self.ScalePlants(self.radishes)
 
 
     def StartGame(self):
@@ -215,11 +213,12 @@ class IdleGame:
         if self.showHoverSquare:
             pygame.draw.rect(self.screen, (150, 150, 0), (self.gridX, self.gridY, self.gridSize, self.gridSize))
         if self.currentSelectPlant is not None and self.currentSelectPlant.planted == 0:
-            self.screen.blit(self.currentSelectPlant.image, (self.gridX+20, self.gridY +10))
+            self.screen.blit(self.currentSelectPlant.images[0], (self.gridX+20, self.gridY +10))
         for pos in self.plantGrid:
-            self.screen.blit(self.plantGrid[pos].image, (self.plantGrid[pos].x+20, self.plantGrid[pos].y+10))
-            self.plantGrid[pos].drawData()
-            self.plantGrid[pos].UpdateGrowth()
+            planted = self.plantGrid[pos]
+            self.screen.blit(planted.images[planted.stage], (planted.x+20, planted.y+10))
+            # planted.drawData()
+            planted.UpdateGrowth()
         pygame.display.flip()
 
     def OnClickPlantBtn(self):
@@ -238,7 +237,13 @@ class IdleGame:
         self.currentSelectPlant.harvestMoney = 10
         self.currentSelectPlant.cost = 5
     def OnClickRadishBtn(self):
-        self.currentSelectPlant = Plant(self.screen, self.mousePos[0], self.mousePos[1], 7, 11, self.radish)
+        self.currentSelectPlant = Plant(self.screen, self.mousePos[0], self.mousePos[1], 7, 11, self.radishes)
         self.currentSelectPlant.growthSpeed = 75
         self.currentSelectPlant.harvestMoney = 20
         self.currentSelectPlant.cost = 10
+    def ScalePlants(self, images):
+        for i in range(0, len(images)):
+            if images[i] is not None:
+                images[i] = pygame.transform.scale(images[i],
+                                                   (images[i].get_width() * 4, images[i].get_height() * 4))
+        return images

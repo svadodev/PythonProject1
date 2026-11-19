@@ -19,7 +19,7 @@ class Plant:
     harvestMoney = 0
     cost = 0
 
-    def __init__(self, screen, x, y, width, height, image):
+    def __init__(self, screen, x, y, width, height, images):
         self.screen = screen
         self.x = x
         self.defaultX = x
@@ -28,10 +28,8 @@ class Plant:
         self.width = width
         self.height = height
         self.rect = pygame.Rect(x, y, width, height)
-        self.image = image
-        if self.image is not None:
-            self.image = pygame.transform.scale(self.image,
-                                                   (self.image.get_width() * 4, self.image.get_height() * 4))
+        self.images = images
+
 
     def Planting(self):
         while self.planted == 0:
@@ -42,16 +40,17 @@ class Plant:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                         self.planted = 1
 
-    def drawData(self):
-        self.screen.blit(self.plantGrowthTxt, (self.x,self.y))
+    # def drawData(self):
+    #     self.screen.blit(self.plantGrowthTxt, (self.x,self.y))
 
     def UpdateGrowth(self):
         self.growthTimer += 1
         if self.growthTimer > self.growthSpeed:
             self.growthTimer = 0
             self.stage += 1
-            if self.stage >= 5:
+            if self.stage >= 4:
+                self.stage = 4
                 self.maxGrowth = True
-                self.plantGrowthTxt = self.font.render("MAX", True, (200, 155, 23))
-            else:
-                self.plantGrowthTxt = self.font.render(f"{self.stage}", True, (200, 155, 23))
+            #     self.plantGrowthTxt = self.font.render("MAX", True, (200, 155, 23))
+            # else:
+            #     self.plantGrowthTxt = self.font.render(f"{self.stage}", True, (200, 155, 23))
